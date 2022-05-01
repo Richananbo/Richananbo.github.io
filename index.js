@@ -99,10 +99,34 @@ class Vector2d {
 
 class Force {
 
+  constructor (v) {
+    this.value = v;
+  }
 
 }
 
 class ResultantForce {
+
+  constructor(forces) {
+    this.forces = forces;
+  }
+
+  add_force(force) {
+    this.forces.push(force);
+  }
+
+  remove_force(force) {
+    this.forces.delete(force);
+  }
+
+  get_resultant_force() {
+    var resultant = new Vector2d(0, 0, false);
+    for (f in this.forces) {
+      resultant.add(f.value);
+    }
+
+    return resultant;
+  }
 
 }
 
@@ -111,12 +135,26 @@ class Unknown {
 }
 
 class Particle {
-  constructor(name, mass, position, velocity, resultant_force, size) {
+  constructor(name, mass, position, velocity, resultant_force, acceleration, size) {
     this.name = name;
     this.mass = mass;
     this.position = position;
     this.velocity = velocity;
-    this.resultant_force = resultant_force;
+    if (resultant_force == undefined) {
+      this.resultant_force = 0;
+      acceleration = 0;
+    }
+    else {
+      this.resultant_force = resultant_force;
+
+    }
+
+    if (acceleration == undefined) {
+      this.acceleration = this.resultant_force.get_resultant_force().scale(this.mass);
+    } else {
+      this.acceleration = acceleration;
+    }
+
     this.size = size;
 
     this.hue = Math.round(Math.random() * 360);
@@ -154,15 +192,28 @@ class Particle {
 
 }
 
-const a = new Particle("n", 2, new Vector2d(100, 400, false), new Vector2d(0.7, 0), null, 50);
+const a = new Particle("n", 2, new Vector2d(100, 400, false), new Vector2d(0.7, 0), undefined, undefined, 50);
+const b = new Particle("o", 5, new Vector2d(1000, 400, false), new Vector2d(-0.3, 0), undefined, undefined, 70);
 
+const objects =  [a, b];
 
 function loop() {
   c.fillStyle = 'black';
   c.fillRect(0, 0, canvas.width, canvas.height);
 
+
+  function update(value, index, array){
+      value.draw();
+      value.update(1);
+  }
+
+  objects.forEach(update);
+
+  /*b.draw();
   a.draw();
+
   a.update(1);
+  b.update(1);*/
   window.requestAnimationFrame(loop);
 }
 
